@@ -255,7 +255,7 @@ def process_news_articles():
             keywords = get_keywords(title)
             search_query = " ".join(keywords)
             reddit_posts = []
-            loader.desc = f"Fetching Reddit posts relevant to news id {news_id}..."
+            loader.desc = f"Fetching..."
             for submission in reddit.subreddit('AskReddit').search(search_query, limit=3):
                 reddit_posts.append({
                     'title': submission.title,
