@@ -17,4 +17,4 @@ To collect data, run `python main.py`.
 
 To generate plots with matplotlib, run `python plot.py`.
 
-`Loader.py `, which is called by `main.py` and `plot.py` contains the class for our loader object which we're using to make our CLI look nice and fancy.
+`utils.py ` contains helper classes for command line interface styling

@@ -6,7 +6,8 @@ import praw
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
 import csv
-from Loader import Loader
+from utils import Loader
+from utils import color
 from azure.ai.textanalytics import TextAnalyticsClient, ExtractiveSummaryAction
 from azure.core.credentials import AzureKeyCredential
 
@@ -27,7 +28,7 @@ def authenticate_client():
 client = authenticate_client()
 
 # Initialize Reddit API
-reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/electrobleach')
+reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/e')
 news_data = []
 
 # Load in NLP with polarity from spacy
@@ -84,20 +85,6 @@ def export_to_csv(data, filename='output.csv'):
         for summary, frequency in data.items():
             writer.writerow([summary, frequency])
 
-
-# For fancy CLI formatting. 
-# Access with color.<attribute> + "string" + color.END
-class color:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
 
 
 # -----  NLP stuff  -----
@@ -256,7 +243,7 @@ def process_news_articles():
             search_query = " ".join(keywords)
             reddit_posts = []
             loader.desc = f"Fetching..."
-            for submission in reddit.subreddit('AskReddit').search(search_query, limit=3):
+            for submission in reddit.subreddit('News').search(search_query, limit=3):
                 reddit_posts.append({
                     'title': submission.title,
                     'url': submission.url,
