@@ -13,29 +13,23 @@ from azure.core.credentials import AzureKeyCredential
 
 load_dotenv()
 
-# Initialize connection to Azure API for text summarization
-key = os.environ.get('AZURE_LANGUAGE_KEY')
-endpoint = os.environ.get('AZURE_LANGUAGE_ENDPOINT')
-
-# Authenticate the client using your key and endpoint 
-def authenticate_client():
-    ta_credential = AzureKeyCredential(key)
+# Initialize connection to Azure API
+def authenticate_azure():
+    ta_credential = AzureKeyCredential(os.environ.get('AZURE_LANGUAGE_KEY'))
     text_analytics_client = TextAnalyticsClient(
-            endpoint=endpoint, 
+            endpoint=os.environ.get('AZURE_LANGUAGE_ENDPOINT'),
             credential=ta_credential)
     return text_analytics_client
+azure = authenticate_azure()
 
-client = authenticate_client()
+# Initialize connection to PRAW API
+praw = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/e')
 
-# Initialize Reddit API
-reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/e')
-news_data = []
-
-# Load in NLP with polarity from spacy
+#NLP Sentiment Analysis stuff
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe('spacytextblob')
 
-
+news_data = []
 
 # Helper functions
 def get_reddit_post_id(reddit_url):
@@ -178,7 +172,7 @@ def process_reddit_posts(news_id, reddit_posts):
                            (news_id, post['title'], post['reddit_url']))
             connection.commit()
 
-        submission = reddit.submission(url=post['reddit_url'])
+        submission = praw.submission(url=post['reddit_url'])
         submission.comment_sort = 'top'
         submission.comments.replace_more(limit=0)  # Load all top-level comments
         comments = [comment.body for comment in submission.comments.list()[:100]]
@@ -200,7 +194,7 @@ def process_reddit_posts(news_id, reddit_posts):
         most_common_sentiment = max(sentiment_count, key=sentiment_count.get, default='Neutral')
         most_common_comments = sentiment_groups.get(most_common_sentiment, [])
         if most_common_comments:
-            summary = summarize_comments(client, most_common_comments)
+            summary = summarize_comments(azure, most_common_comments)
             cursor.execute('INSERT INTO opinions (news_id, sentiment, positive_count, neutral_count, negative_count) VALUES (?, ?, ?, ?, ?)', 
                            (news_id, summary, sentiment_count['Positive'], sentiment_count['Neutral'], sentiment_count['Negative']))
             connection.commit()
@@ -243,7 +237,7 @@ def process_news_articles():
             search_query = " ".join(keywords)
             reddit_posts = []
             loader.desc = f"Fetching..."
-            for submission in reddit.subreddit('News').search(search_query, limit=3):
+            for submission in praw.subreddit('News').search(search_query, limit=3):
                 reddit_posts.append({
                     'title': submission.title,
                     'url': submission.url,
