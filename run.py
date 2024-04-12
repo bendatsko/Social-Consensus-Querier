@@ -17,15 +17,6 @@ nlp.add_pipe('spacytextblob')
 reddit_client = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/test')
 nyt_key = os.getenv('NYT_API_KEY')
 
-
-# each time file run.py is executed we need to store 25 things into the database we need to be able to run this time
-# multiple times without duplicating data proposed solution: check the size of the database and each time we have
-# done over some multiple of 25 we switch to another similar api until we have over 100 elements in the database
-
-
-
-
-
 def authenticate_azure():
     ta_credential = AzureKeyCredential(os.environ.get('AZURE_LANGUAGE_KEY'))
     text_analytics_client = TextAnalyticsClient(
@@ -44,13 +35,13 @@ def main():
 
     -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n""" + color.END
     print(title)
-    num_articles = 100
+    num_articles = 10
 
     setup_database()
     fetch_titles_from_nyt(nyt_key, num_articles)
-    # search_reddit_for_articles(reddit_client)
-    # summarize_comments(azure_client)
-    # dump_to_csv("output.csv")
+    search_reddit_for_articles(reddit_client)
+    summarize_comments(azure_client)
+    dump_to_csv("output.csv")
 
 
 def setup_database():
@@ -59,8 +50,6 @@ def setup_database():
     cursor = connection.cursor()
 
     cursor.execute('DROP TABLE IF EXISTS reddit_posts')
-    cursor.execute('DROP TABLE IF EXISTS news')
-
 
     cursor.execute('''
          CREATE TABLE IF NOT EXISTS news (
@@ -91,7 +80,7 @@ def setup_database():
 
 def fetch_titles_from_nyt(nyt_key, num_articles):
     loader = Loader("Fetching news from New York Times...").start()
-    base_url = "https://api.nytimes.com/svc/mostpopular/v2/viewed/1.json?api-key=DpBMPA3jc3dALmp7IslDL2q5Ll4qCNoi"
+    base_url = "https://api.nytimes.com/svc/topstories/v2/home.json"
     query_params = {"api-key": nyt_key}
     response = requests.get(base_url, params=query_params)
     if response.status_code == 200:
