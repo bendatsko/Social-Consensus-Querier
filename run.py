@@ -17,6 +17,13 @@ nlp.add_pipe('spacytextblob')
 reddit_client = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/test')
 nyt_key = os.getenv('NYT_API_KEY')
 
+
+# each time file run.py is executed we need to store 25 things into the database we need to be able to run this time
+# multiple times without duplicating data proposed solution: check the size of the database and each time we have
+# done over some multiple of 25 we switch to another year on the archive api
+
+
+
 def authenticate_azure():
     ta_credential = AzureKeyCredential(os.environ.get('AZURE_LANGUAGE_KEY'))
     text_analytics_client = TextAnalyticsClient(
@@ -35,13 +42,15 @@ def main():
 
     -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n""" + color.END
     print(title)
-    num_articles = 10
+    num_articles = 25
 
     setup_database()
-    fetch_titles_from_nyt(nyt_key, num_articles)
-    search_reddit_for_articles(reddit_client)
-    summarize_comments(azure_client)
-    dump_to_csv("output.csv")
+
+    # need more news titles, so use 4 diff keys, each one time to reach 100 inputs
+    fetch_titles_from_nyt(nyt_key, num_articles, 'news.db')
+    # search_reddit_for_articles(reddit_client)
+    # summarize_comments(azure_client)
+    # dump_to_csv("output.csv")
 
 
 def setup_database():
@@ -49,7 +58,8 @@ def setup_database():
     connection = sqlite3.connect('news.db')
     cursor = connection.cursor()
 
-    cursor.execute('DROP TABLE IF EXISTS reddit_posts')
+    #cursor.execute('DROP TABLE IF EXISTS reddit_posts')
+    #cursor.execute('DROP TABLE IF EXISTS news')
 
     cursor.execute('''
          CREATE TABLE IF NOT EXISTS news (
@@ -78,17 +88,36 @@ def setup_database():
     connection.close()
     loader.stop()
 
-def fetch_titles_from_nyt(nyt_key, num_articles):
+
+def fetch_titles_from_nyt(nyt_key, num_articles, db):
     loader = Loader("Fetching news from New York Times...").start()
-    base_url = "https://api.nytimes.com/svc/topstories/v2/home.json"
+
+    # see how many rows there are currently in the database
+    connection = sqlite3.connect('news.db')
+    cursor = connection.cursor()
+    cursor.execute('''SELECT * FROM news''')
+    rows_lst = cursor.fetchall()
+    numRows = len(rows_lst)
+    # use different year based on amount of rows
+    if numRows == 0:
+        base_url = "https://api.nytimes.com/svc/archive/v1/2015/1.json?api-key=993r5GCpPZFpqH6SwFJupbPt2rGFBjcw"
+    elif numRows == 25:
+        base_url = "https://api.nytimes.com/svc/archive/v1/2016/1.json?api-key=993r5GCpPZFpqH6SwFJupbPt2rGFBjcw"
+    elif numRows == 50:
+        base_url = "https://api.nytimes.com/svc/archive/v1/2017/1.json?api-key=993r5GCpPZFpqH6SwFJupbPt2rGFBjcw"
+    elif numRows == 75:
+        base_url = "https://api.nytimes.com/svc/archive/v1/2018/1.json?api-key=993r5GCpPZFpqH6SwFJupbPt2rGFBjcw"
+    else:
+        base_url = "https://api.nytimes.com/svc/archive/v1/2019/1.json?api-key=993r5GCpPZFpqH6SwFJupbPt2rGFBjcw"
+
     query_params = {"api-key": nyt_key}
     response = requests.get(base_url, params=query_params)
     if response.status_code == 200:
-        news_data = response.json()['results'][:num_articles]
+        news_data = response.json()["response"]['docs'][:num_articles]
 
         connection = sqlite3.connect('news.db')
         cursor = connection.cursor()
-        cursor.execute('DELETE FROM news') # if it's a new day, then clear the news database
+        #cursor.execute('DELETE FROM news') # if it's a new day, then clear the news database
 
         cursor.execute('SELECT MAX(article_id) FROM news')
         max_id = cursor.fetchone()[0]
@@ -97,13 +126,13 @@ def fetch_titles_from_nyt(nyt_key, num_articles):
 
         for story in news_data:
             max_id += 1
-            cursor.execute('INSERT INTO news (article_id, title, url) VALUES (?, ?, ?)', (max_id, story['title'], story['url']))
+            cursor.execute('INSERT INTO news (article_id, title, url) VALUES (?, ?, ?)', (max_id, story['abstract'], story['web_url']))
 
         connection.commit()
         connection.close()
 
         loader.stop()
-        print(f"vSaved {len(news_data)} New York Times article titles to news database.")
+        print(f"Saved {len(news_data)} New York Times article titles to news database.")
 
 def search_reddit_for_articles(reddit_client):
     loader = Loader("Searching for articles on Reddit...").start()
