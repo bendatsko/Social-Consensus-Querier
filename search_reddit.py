@@ -68,5 +68,4 @@ if __name__ == "__main__":
         client_id=os.getenv('REDDIT_CLIENT_ID'),
         client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
         user_agent='script by /u/test')
-    for i in range(0,5):
-        search_reddit_for_articles(reddit_client)
+    search_reddit_for_articles(reddit_client)

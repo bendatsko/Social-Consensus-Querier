@@ -14,7 +14,8 @@ def main():
 
     # search for 5 fetched new york times article titles on reddit and gather 5 comments from each article's 5 most relevant posts using PRAW API.
     # Stores 25 articles each time, so we need to run this 5 times for 25 articles.
-    subprocess.call("python3 search_reddit.py", shell=True)
+    for i in range(0,5):
+        subprocess.call("python3 search_reddit.py", shell=True)
 
     # fetch the reddit post titles and comments associated with each new york times article and summarize the article with the opinions in context with Azure API
     subprocess.call("python3 get_summaries.py", shell=True)
