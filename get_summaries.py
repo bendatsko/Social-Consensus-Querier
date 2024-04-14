@@ -36,6 +36,7 @@ def summarize_comments(client):
     articles = cursor.fetchall()
 
     for article_id, ny_times_title in articles:
+        loader.desc = f"Summarizing article {article_id}..."
         cursor.execute('''
             SELECT r.reddit_title, r.comment1, r.comment2, r.comment3, r.comment4, r.comment5
             FROM reddit_posts r
@@ -68,15 +69,13 @@ def summarize_comments(client):
                         summary = "".join(sentence.text for sentence in summary_result.sentences)
                         cursor.execute('INSERT INTO article_summaries (article_id, summary) VALUES (?, ?)', (article_id, summary))
                         cursor.execute('UPDATE news SET is_summarized = 1 WHERE article_id = ?', (article_id,))
-                        print(f"\n\nSummary created for Article ID {article_id}\n-------------------")
-
     if not articles:
         print("\nNo unprocessed articles left.")
 
     connection.commit()
     connection.close()
+    loader.desc = "Summarizing next 25 un-summarized articles..."
     loader.stop()
-    print("Summarization process completed.")
 
 if __name__ == "__main__":
     summarize_comments(azure_client)

@@ -20,8 +20,16 @@ def extract_keywords(title):
     keywords = [token.text for token in doc if token.pos_ in ['NOUN', 'PROPN']]
     return " ".join(keywords)
 
+
+def truncate_description(title, max_length=100):
+    """ Truncate the title if it exceeds the maximum length allowed in the description """
+    if len(title) > max_length:
+        return title[:max_length - 3] + '...'
+    return title
+
 def search_reddit_for_articles(reddit_client):
-    loader = Loader("Searching for articles on Reddit...").start()
+    loader = Loader("Searching Reddit...").start()
+    
     connection = sqlite3.connect('news.db')
     cursor = connection.cursor()
 
@@ -32,14 +40,12 @@ def search_reddit_for_articles(reddit_client):
     if articles:
         for article in articles:
             article_id, title = article
+            truncated_title = truncate_description(title)
             keywords = extract_keywords(title)
-            print(f"\n{'-'*50}\nSearching Reddit for keywords: '{keywords}' from article titled: '{title}'\n{'-'*50}")
-
+            loader.desc = f"Searching for Reddit posts and opinions related to article {article_id}: '{truncated_title}'"
             search_results = reddit_client.subreddit('all').search(keywords, limit=5)
             
             for submission in search_results:
-                print(f"\nFound Reddit post: {submission.title}\nURL: {submission.url}")
-                
                 submission.comments.replace_more(limit=0)
                 top_comments = submission.comments.list()[:5]
                 comments_text = [clean_comment(comment.body) for comment in top_comments] + [''] * (5 - len(top_comments))
@@ -49,10 +55,6 @@ def search_reddit_for_articles(reddit_client):
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', 
                     (article_id, submission.title, submission.url, *comments_text))
 
-                print(f"\nTop 5 comments for '{submission.title}':")
-                for idx, comment in enumerate(comments_text, 1):
-                    print(f"\tComment {idx}: {comment}")
-
             cursor.execute('UPDATE news SET is_searched = 1 WHERE article_id = ?', (article_id,))
 
     else:
@@ -60,12 +62,10 @@ def search_reddit_for_articles(reddit_client):
 
     connection.commit()
     connection.close()
+    loader.desc = f"Search for 5 New York Times articles on Reddit and getting 5 relevant comments (storing 25 elements in reddit_posts table)..."
     loader.stop()
-    print("\nCompleted searching Reddit for news articles.")
+
 
 if __name__ == "__main__":
-    reddit_client = praw.Reddit(
-        client_id=os.getenv('REDDIT_CLIENT_ID'),
-        client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
-        user_agent='script by /u/test')
+    reddit_client = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='script by /u/si206')
     search_reddit_for_articles(reddit_client)

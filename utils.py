@@ -46,7 +46,9 @@ class Loader:
             if self.update_desc_event.is_set():
                 self.update_desc_event.clear()  # Acknowledge the update
                 print("\r" + " " * cols, end="", flush=True)  # Clear the line
-            print(f"\r{self.desc} {next(self.steps)}", flush=True, end="")
+            # Move spinner to the left side of the description
+            print(f"\r{next(self.steps)} {self.desc}", flush=True, end="")
+
 
     def stop(self):
         self.done = True

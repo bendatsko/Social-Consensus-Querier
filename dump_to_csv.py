@@ -7,10 +7,13 @@ from spacytextblob.spacytextblob import SpacyTextBlob
 from utils import Loader
 load_dotenv()
 
+
+loader = Loader("Parsing tables...")
+
+
 def analyze_comment_sentiment(article_id):
     nlp = spacy.load("en_core_web_sm")
     nlp.add_pipe('spacytextblob')
-
     connection = sqlite3.connect('news.db')
     cursor = connection.cursor()
     cursor.execute('''
@@ -42,6 +45,7 @@ def get_year(numRows):
         return 2019
 
 def dump_to_csv(filename='output.csv'):
+    loader.start()
     connection = sqlite3.connect('news.db')
     cursor = connection.cursor()
 
@@ -58,6 +62,7 @@ def dump_to_csv(filename='output.csv'):
 
         for i, article in enumerate(articles):
             article_id, title, url, summary = article
+            loader.desc = f"Preparing export data for article {article_id}..."
 
             sentiments = analyze_comment_sentiment(article_id)
             year = get_year(i)  # Determine the year based on row number
@@ -65,7 +70,9 @@ def dump_to_csv(filename='output.csv'):
             writer.writerow([article_id, title, year, sentiments, url, summary])
 
     connection.close()
-    print(f"Data exported to {filename}.")
+    loader.desc = f"Data dump to {filename}..."
+    loader.stop()
+    
 
 if __name__ == "__main__":
     dump_to_csv()
