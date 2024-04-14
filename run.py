@@ -21,13 +21,6 @@ def main():
     subprocess.call("python3 dump_to_csv.py", shell=True)
     print("Data compilation complete. CSV file ready.")
 
-    print("Generating sentiment analysis visualizations...")
-    subprocess.call("python3 plot_12_sentiments.py", shell=True)
-    print("Sentiment analysis plots created.")
-
-    print("All processes completed successfully.")
-
-
 
 if __name__ == "__main__":
     main()
