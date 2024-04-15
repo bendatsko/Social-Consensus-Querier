@@ -19,7 +19,7 @@ def plot_all_news_opinions(filename):
     fig, axs = plt.subplots(grid_size, grid_size, figsize=(16, 9))
     axs = axs.flatten()
 
-    # loop through and aggregate the avg sentiment scores for each year 
+    # loop through and aggregate the avg sentiment scores for each year
     # - store info in dictionary where keys are the year and the values are a list of scores
     year_scores_dict = {}
     for i in range(n_articles):
