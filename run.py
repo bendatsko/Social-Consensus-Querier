@@ -1,5 +1,6 @@
 import subprocess
 
+
 def main():
     print("Starting the setup process...")
     subprocess.call("python3 setup.py", shell=True)  # Use flag --clear to drop all tables
@@ -9,7 +10,7 @@ def main():
 
     print("Searching for Reddit discussions related to fetched articles...")
     for i in range(5):
-        print(f"Initiating search for batch {i+1}/5...")
+        print(f"Initiating search for batch {i + 1}/5...")
         subprocess.call("python3 search_reddit.py", shell=True)
     print("Reddit searches completed and data stored.")
 

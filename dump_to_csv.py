@@ -1,12 +1,12 @@
-import sqlite3
 import csv
-from dotenv import load_dotenv
-import os
-import spacy
-from spacytextblob.spacytextblob import SpacyTextBlob
-from utils import Loader
-load_dotenv()
+import sqlite3
 
+import spacy
+from dotenv import load_dotenv
+
+from utils import Loader
+
+load_dotenv()
 
 loader = Loader("Parsing tables...")
 
@@ -32,7 +32,8 @@ def analyze_comment_sentiment(article_id):
     connection.close()
     return sentiments
 
-def get_year(numRows):    
+
+def get_year(numRows):
     if 0 <= numRows < 25:
         return 2015
     elif 25 <= numRows < 50:
@@ -43,6 +44,7 @@ def get_year(numRows):
         return 2018
     else:
         return 2019
+
 
 def dump_to_csv(filename='output.csv'):
     loader.start()
@@ -72,7 +74,7 @@ def dump_to_csv(filename='output.csv'):
     connection.close()
     loader.desc = f"Data dump to {filename}..."
     loader.stop()
-    
+
 
 if __name__ == "__main__":
     dump_to_csv()

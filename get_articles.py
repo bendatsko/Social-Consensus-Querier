@@ -1,20 +1,24 @@
+import os
 import sqlite3
+import time
+
 import requests
 from dotenv import load_dotenv
-import os
-import time
+
 from utils import Loader
+
 load_dotenv()
 
 nyt_key = os.getenv('NYT_API_KEY')
 
-def fetch_titles_from_nyt(num_articles = 25, db = 'news.db'):
+
+def fetch_titles_from_nyt(num_articles=25, db='news.db'):
     loader = Loader(f"Getting {num_articles} articles from New York Times...").start()
 
     # Establish connection to the database 
     connection = sqlite3.connect(db)
     cursor = connection.cursor()
-    
+
     # Get the current count of articles in the news table
     cursor.execute('''SELECT COUNT(*) FROM news''')
     numRows = cursor.fetchone()[0]
@@ -31,12 +35,12 @@ def fetch_titles_from_nyt(num_articles = 25, db = 'news.db'):
         year = 2018
     else:
         year = 2019
-    
+
     # Construct query
     base_url = f"https://api.nytimes.com/svc/archive/v1/{year}/1.json"
     query_params = {"api-key": nyt_key}
     response = requests.get(base_url, params=query_params)
-    
+
     if response.status_code == 200:
         # Get the current news table's last element
         news_data = response.json()["response"]['docs'][:num_articles]
@@ -46,8 +50,9 @@ def fetch_titles_from_nyt(num_articles = 25, db = 'news.db'):
         # actually insert the elements pulled from the api into the news db
         for story in news_data:
             max_id += 1
-            cursor.execute('INSERT INTO news (article_id, title, url) VALUES (?, ?, ?)', (max_id, story['abstract'], story['web_url']))
-        
+            cursor.execute('INSERT INTO news (article_id, title, url) VALUES (?, ?, ?)',
+                           (max_id, story['abstract'], story['web_url']))
+
         loader.desc = f"Saving {len(news_data)} New York Times article titles to news table..."
         connection.commit()
         time.sleep(2)
@@ -56,6 +61,7 @@ def fetch_titles_from_nyt(num_articles = 25, db = 'news.db'):
         loader.stop()
         print("Failed to fetch data from New York Times API.")
     connection.close()
+
 
 if __name__ == "__main__":
     fetch_titles_from_nyt()

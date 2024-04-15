@@ -1,14 +1,17 @@
-import matplotlib.pyplot as plt
 import csv
-import textwrap
 import math
 import random
+import textwrap
 import webbrowser
+
+import matplotlib.pyplot as plt
+
 
 def clip_summary(summary, max_chars=90):
     if len(summary) > max_chars:
         return summary[:max_chars] + '...'
     return summary
+
 
 def plot_selected_news_opinions(filename, sample_size=12):
     with open(filename, mode='r', encoding='utf-8') as file:
@@ -69,7 +72,9 @@ def plot_selected_news_opinions(filename, sample_size=12):
         ax.axis('off')
 
     plt.subplots_adjust(left=0.052, right=0.952, top=0.887, bottom=0.11, wspace=0.435, hspace=0.887)
-    fig.suptitle('Sentiment Analysis for 12 New York Times Articles Based on Reddit Comments', fontsize=16, fontweight='bold') 
+    fig.suptitle('Sentiment Analysis for 12 New York Times Articles Based on Reddit Comments', fontsize=16,
+                 fontweight='bold')
     plt.show()
+
 
 plot_selected_news_opinions("output.csv")

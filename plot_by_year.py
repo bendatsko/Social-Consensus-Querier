@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt
 import csv
+
+import matplotlib.pyplot as plt
 
 
 def plot_average_sentiment(filename):
