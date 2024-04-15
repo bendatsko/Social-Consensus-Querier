@@ -1,9 +1,26 @@
-import subprocess
+"""
+run.py
+------
+This script coordinates the execution of our data collection pipeline.
 
+Workflow:
+- Sets up database.
+- Fetches articles from the New York Times.
+- Searches for related Reddit discussions.
+- Summarizes the articles and discussions.
+- Dumps all data into a CSV file for further analysis.
+
+Usage:
+- Run script directly to execute pipeline: `python run.py`
+"""
+
+import subprocess
 
 def main():
     print("Starting the setup process...")
-    subprocess.call("python3 setup.py", shell=True)  # Use flag --clear to drop all tables
+    subprocess.call(
+        "python3 setup.py", shell=True
+    )  # Use flag --clear to drop all tables
 
     print("Fetching New York Times articles...")
     subprocess.call("python3 get_articles.py", shell=True)

@@ -1,13 +1,29 @@
+"""
+setup.py
+--------
+This file initializes and/or resets the database for storing article and Reddit post data.
+
+Includes:
+- Creates `news`, `reddit_posts`, and `article_summaries` tables in a SQLite database.
+- Allows user to clear all existing data with the `--clear` flag when running the script.
+
+Usage:
+- To set up the database: `python setup.py`
+- To clear all existing tables: `python setup.py --clear`
+"""
+
 import sqlite3
 import argparse
 from utils import Loader
 
-def setup_database():
-        connection = sqlite3.connect('news.db')
-        cursor = connection.cursor()
-        loader = Loader("Setting up database...").start()
 
-        cursor.execute('''
+def setup_database():
+    connection = sqlite3.connect("news.db")
+    cursor = connection.cursor()
+    loader = Loader("Setting up database...").start()
+
+    cursor.execute(
+        """
             CREATE TABLE IF NOT EXISTS news (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 article_id INTEGER UNIQUE,
@@ -16,8 +32,10 @@ def setup_database():
                 is_searched INTEGER DEFAULT 0,
                 is_summarized INTEGER DEFAULT 0
             );
-        ''')
-        cursor.execute('''
+        """
+    )
+    cursor.execute(
+        """
             CREATE TABLE IF NOT EXISTS reddit_posts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 article_id INTEGER,
@@ -30,32 +48,35 @@ def setup_database():
                 comment5 TEXT,
                 FOREIGN KEY (article_id) REFERENCES news(article_id)
             );
-        ''')
-        cursor.execute('''
+        """
+    )
+    cursor.execute(
+        """
             CREATE TABLE IF NOT EXISTS article_summaries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 article_id INTEGER,
                 summary TEXT,
                 FOREIGN KEY (article_id) REFERENCES news(article_id)
             );
-        ''')
+        """
+    )
 
-        connection.commit()
-        connection.close()
-        loader.stop()
-    
+    connection.commit()
+    connection.close()
+    loader.stop()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--clear', action='store_true')
+    parser.add_argument("--clear", action="store_true")
     args = parser.parse_args()
-    
+
     if args.clear:
-        connection = sqlite3.connect('news.db')
+        connection = sqlite3.connect("news.db")
         cursor = connection.cursor()
-        cursor.execute('DROP TABLE IF EXISTS reddit_posts')
-        cursor.execute('DROP TABLE IF EXISTS news')
-        cursor.execute('DROP TABLE IF EXISTS article_summaries')
+        cursor.execute("DROP TABLE IF EXISTS reddit_posts")
+        cursor.execute("DROP TABLE IF EXISTS news")
+        cursor.execute("DROP TABLE IF EXISTS article_summaries")
         print("Cleared existing tables.")
     else:
         setup_database()

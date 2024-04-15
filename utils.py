@@ -1,7 +1,17 @@
+"""
+utils.py
+--------
+This file includes utility functions and classes used elsewhere in the project.
+
+Includes:
+- Loader: A class to display a spinner in the command line interface during operations.
+          Uses threading to manage the spinner without blocking main program execution.
+- color: A class providing terminal color codes because I'm lazy and don't want to type them.
+"""
+
 from itertools import cycle
 from shutil import get_terminal_size
 from threading import Thread, Event
-from time import sleep
 
 class Loader:
     def __init__(self, desc="Loading...", end="{task} complete.", timeout=0.1):
@@ -49,7 +59,6 @@ class Loader:
             # Move spinner to the left side of the description
             print(f"\r{next(self.steps)} {self.desc}", flush=True, end="")
 
-
     def stop(self):
         self.done = True
         self.resume()  # Resume to allow the thread to complete
@@ -68,15 +77,13 @@ class Loader:
 # For fancy CLI formatting.
 # Access with color.<attribute> + "string" + color.END
 class color:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
-
-
+    PURPLE = "\033[95m"
+    CYAN = "\033[96m"
+    DARKCYAN = "\033[36m"
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    END = "\033[0m"

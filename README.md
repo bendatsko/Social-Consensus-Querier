@@ -1,26 +1,79 @@
-# Public Opinion Aggregator For Current Events
-This project pulls current events from the New York Times API and aggregates public opinions on these events from Reddit comments using Azure AI text summarization.
+# Public Opinion Miner For Current Events
 
-We also plot the frequency a "positive", "neutral", or "negative" perception on a current event which we gain by categorizing each comment using sentiment analysis before storing it in our database. 
+## Overview
+This tool integrates article data from the New York Times API and public opinion from Reddit. It aggregates and analyzes the public's perception of global events using sentiment analysis and Azure's AI Language API. It categorizes sentiments from Reddit comments as positive, neutral, or negative and provides a summarized view of public opinion, helping users understand prevailing attitudes toward current events at a glance.
 
-Based on how a global event is percieved by the general public and how controversial it is, we can get a better understand the world around us at a glance.
+## Workflow
+1. **Article Fetching**: Retrieve trending articles from the New York Times API.
+2. **Opinion Mining**: Search for related discussions on Reddit using PRAW (Python Reddit API Wrapper).
+3. **Sentiment Analysis**: Categorize comments into positive, neutral, or negative sentiments.
+4. **Discussion Summarization**: Summarize articles' associated Reddit discussions using Azure AI Language API.
+5. **Data Visualization**: Gain unique insights into opinion trends and how they correlate with global events.
 
-# APIs Used
-- New York Times Trending Articles API
-- PRAW API (Python Reddit API Wrapper)
-- Azure AI Language API  
+## Project Structure
+- `setup.py`: Sets up the SQLite database to store article and discussion data.
+- `get_articles.py`: Fetches articles from the New York Times API.
+- `search_reddit.py`: Searches for and stores Reddit discussions related to the fetched articles.
+- `get_summaries.py`: Summarizes articles and discussions using Azure AI.
+- `dump_to_csv.py`: Exports collected and processed data to a CSV file.
+- `plot_selected_news_opinions.py`: Visualizes the sentiment analysis results using matplotlib.
+- `run.py`: A convenience script to execute all the above scripts sequentially.
+- `utils.py`: Contains helper classes and functions to improve the user interface in the command line.
 
-# Getting Started
-All dependencies are listed in requirements.txt. To install them, execute the following command in your command line interface: `pip install -r requirements.txt`
+## Visualizations
+- `plot_12_sentiments.py`: Creates sentiment visualizations for 12 randomly-selected articles in the database with matplotlib, and provides a summarized public opinion on the matters addressed by the article.
+- `plot_by_year.py`: Plots the average sentiment over the years data is pulled for.
 
-* Setup the database with `python3 setup.py`. To drop all tables, you can run with same program with the `--clear` flag, i.e., `python3 setup.py --clear`
-* Fetch New York Times article titles with `python3 get_articles.py`. Stores 25 articles in the `news` table at a time.
-* Search Reddit using PRAW for comments and opinions relevant to the articles fetched wtih `python3 search_reddit.py`. Stores search results for the next 25 non-searched articles in the `reddit_posts` table, and includes post titles, post url, and 5 post comments.
-* Send the comments and article titles for in-context analysis via the Azure language summarization API using `python3 get_summaries.py`. Stores summaries for the next 25 non-summaried articles in the `article_summaries` table.
-* Join the contents of the `news`, `reddit_posts` and `article_summaries` tables and export database contents to a csv file with `python3 dump_to_csv.py`.
 
-For convenience, execute `python3 run.py` one time. This program run each one of these programs sequentially. 
+## Getting Started
+### Installation
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/bendatsko/206-final-project
+   ```
+2. **Install Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3. **Environment Variables**: <br>
+    Set the following environment variables in `.env`:
+    * `NYT_API_KEY`: New York Times Developer API key.
+    * `REDDIT_CLIENT_ID`: Reddit application client ID.
+    * `REDDIT_CLIENT_SECRET`: Reddit application client secret.
+    * `AZURE_LANGUAGE_KEY`: Azure AI Language API key.
+    * `AZURE_LANGUAGE_ENDPOINT`: Endpoint for the Azure AI Language service.
 
-To generate plots with matplotlib from the data outputted to our csv file, run `python3 plot.py`.
+### Automated Execution <br>
+Run all processes in one sequence and aggregate data for approximately 25 articles. This process is slow and should take around 3 minutes.
+```bash
+python3 run.py
+```
+<br>
+These can also be invoked manually, of course, with the following commands:
 
-For completeness, `utils.py ` contains helper classes for command line interface styling. 
+**Database Initialization**:
+```bash
+python3 setup.py
+```
+Use `--clear` to drop all tables:
+```bash
+python3 setup.py --clear
+```
+**Fetching Articles:**:
+```bash
+python3 get_articles.py
+```
+**Searching Reddit:**:
+```bash
+python3 search_reddit.py
+```
+**Generating Summaries:**:
+```bash
+python3 get_summaries.py
+```
+**Exporting Data to CSV:**:
+```bash
+python3 dump_to_csv.py
+```
+
+
