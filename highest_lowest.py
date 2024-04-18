@@ -19,7 +19,6 @@ def highest_lowest(filename):
     grid_size = 2
 
    
-    plt.suptitle("Most Controvesial News Article Per Year")
 
     # - store info in dictionary where keys are the year and the values are a list of scores
 
@@ -38,9 +37,9 @@ def highest_lowest(filename):
             max_score = max(sentiment_scores)
             min_score = min(sentiment_scores)
 
-        difference = abs(max_score-min_score)
+            difference = abs(max_score-min_score)
         
-        title_scores_dict[article_title] = difference
+            title_scores_dict[article_title] = difference
 
         year_score_dict[article_year] = title_scores_dict
 
@@ -51,27 +50,26 @@ def highest_lowest(filename):
                 highest_difference = score
                 title_list.append(title)
                 key_highdif_dict[year] = highest_difference
-    print(key_highdif_dict)
-    print(title_list)
+
     plotyears = list(key_highdif_dict.keys())
     plotscores = list(key_highdif_dict.values())
     plottitles = list(title_scores_dict)
-        
-    
+    print(key_highdif_dict)
     
     mpl.rcParams['font.size'] = 4
     fig, axs = plt.subplots(2, 2)
-    axs[0, 0].plot(plotyears[0], plotscores[0])
+    fig.suptitle("Most Controversial Article Per Year")
+    axs[0, 0].bar( plotyears[0], plotscores[0], width = 0.4)
     axs[0, 0].set_title(title_list[0])
-    axs[1, 0].plot(plotyears[2], plotscores[2])
+    axs[1, 0].bar(plotyears[2], plotscores[2])
     axs[1, 0].set_title(title_list[1])
     
-    axs[0, 1].plot(plotyears[1], plotscores[1])
+    axs[0, 1].bar(plotyears[1], plotscores[1])
     axs[0, 1].set_title(title_list[2])
-    axs[1, 1].plot(plotyears[3], plotscores[3])
+    axs[1, 1].bar(plotyears[3], plotscores[3])
     axs[1, 1].set_title(title_list[3])
     fig.tight_layout()
-    plt.show()
+    # plt.show()
 
 
  
