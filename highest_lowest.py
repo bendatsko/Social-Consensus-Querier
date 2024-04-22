@@ -45,11 +45,19 @@ def highest_lowest(filename):
     plt.bar(years, differences)
     plt.xlabel('Year')
     plt.ylabel('Max Sentiment Difference')
-    plt.title('Most Controversial News Article Per Year')
     
+    plt.suptitle(
+        "Most Controversial News Article Per Year",
+        fontsize=16,
+        fontweight="bold",
+    )
+        
+        
     for i in range(len(years)):
-        plt.text(i, differences[i], textwrap.shorten(titles[i], width=30), ha='center', va='bottom')
-    
+        wrapped_title = textwrap.fill(titles[i], width=30)  # Wrap the title to multiple lines
+        plt.text(i, differences[i], wrapped_title, ha='center', va='bottom', fontsize=8,
+                 bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))  # Adjust padding with 'pad' parameter
+        
     plt.show()
 
 
