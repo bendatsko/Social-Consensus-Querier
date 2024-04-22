@@ -1,4 +1,4 @@
-# Public Opinion Miner For Current Events
+# Social Opinion Miner For Current Events
 
 ## Overview
 This tool integrates article data from the New York Times API and public opinion from Reddit. It aggregates and analyzes the public's perception of global events using sentiment analysis and Azure's AI Language API. It categorizes sentiments from Reddit comments as positive, neutral, or negative and provides a summarized view of public opinion, helping users understand prevailing attitudes toward current events at a glance.
